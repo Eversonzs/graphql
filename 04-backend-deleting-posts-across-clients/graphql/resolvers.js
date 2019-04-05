@@ -15,13 +15,13 @@ module.exports = {
             errors.push({message: "Password to short!", code: 400})
         }
 
-        if (errors.length >0 ){
-            const error = new Error('Invalid input.');
+        if (errors.length > 0 ){
+            const error = new Error(errors[0].message);
             console.log("resolver error---", errors);
             error.data = errors;
             throw error;
         }
-        
+
         const existingUser = await User.findOne({email: email});
         if(existingUser){
             const error = new Error('User exists already!');

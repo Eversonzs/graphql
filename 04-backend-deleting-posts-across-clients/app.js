@@ -47,8 +47,34 @@ app.use((req, res, next) => {
     'OPTIONS, GET, POST, PUT, PATCH, DELETE'
   );
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if(req.method === "OPTIONS"){
+    return res.sendStatus(200);
+  }
   next();
 });
+
+app.use('/users',/*  (req, res) => { */
+  graphqlHttp({
+    schema: graphqlSchema,
+    rootValue: graphqlResolver,
+    graphiql: true,
+    formatError(err){
+      if(!err.originalError){
+        return err;
+      }
+      console.log("this err----", err.originalError.data);
+      let data = err.originalError.data;
+      let message = err.message || 'An error ocurred.';;
+      let code = err.originalError.code || 500;
+      /* data.forEach(error => {
+        message = error.message || 'An error ocurred.';
+        code = error.code || 500;
+      }); */
+      /* res.status(code).json({ message: message, data: data }); */
+      return { message: message, status: code, data: data};
+    }
+  }) /* (req, res)
+} */);
 
 app.use('/graphql', graphqlHttp({
   schema: graphqlSchema,
@@ -58,16 +84,16 @@ app.use('/graphql', graphqlHttp({
     if(!err.originalError){
       return err;
     }
-    console.log("this err----", err.data);
+    console.log("this err graphql----", err);
     let data = err.originalError.data;
     let message = err.message || 'An error ocurred.';
-    let code = err.originalError.code || 500;
+    let code = err.code || 500;
     return { message: message, status: code, data: data};
   }
 }));
 
 app.use((error, req, res, next) => {
-  console.log(error);
+  console.log("here!!!!", error);
   const status = error.statusCode || 500;
   const message = error.message;
   const data = error.data;
