@@ -131,27 +131,52 @@ class Feed extends Component {
     formData.append('title', postData.title);
     formData.append('content', postData.content);
     formData.append('image', postData.image);
-    let url = 'http://localhost:8080/feed/post';
-    let method = 'POST';
-    if (this.state.editPost) {
-      url = 'http://localhost:8080/feed/post/' + this.state.editPost._id;
-      method = 'PUT';
+    
+    let graphqlQuery ={
+      query: `
+        mutation{
+          createPost(postInput: {
+            title: "${postData.title}",
+            content: "${postData.content}",
+            imageUrl: "https://www.shutterstock.com/es/image-vector/rubber-stamp-word-posted-inside-vector-368554292"
+          }){
+            _id
+            title
+            content
+            imageUrl
+            creator {
+              name
+              email
+            }
+            createdAt
+          }
+        }
+      `
     }
 
-    fetch(url, {
-      method: method,
-      body: formData,
+    fetch('http://localhost:8080/graphql', {
+      method: 'POST',
+      body: JSON.stringify(graphqlQuery),
       headers: {
-        Authorization: 'Bearer ' + this.props.token
+        Authorization: 'Bearer ' + this.props.token,
+        'Content-type': 'application/json'
       }
     })
       .then(res => {
-        if (res.status !== 200 && res.status !== 201) {
-          throw new Error('Creating or editing a post failed!');
-        }
         return res.json();
       })
       .then(resData => {
+        if(resData.errors && resData.errors[0].status){
+          throw new Error(
+            resData.errors[0].message
+          )
+        }
+        if(resData.errors){
+          throw new Error(
+            "User login failed. "
+          )
+        }
+
         console.log(resData);
         const post = {
           _id: resData.post._id,

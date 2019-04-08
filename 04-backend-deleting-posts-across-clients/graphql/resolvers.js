@@ -56,12 +56,17 @@ module.exports = {
         let token = jsonWebToken.sign({
             userId: user._id.toString(),
             email: user.email
-        }, 'someSecret', { expiresIn: '1h' })
+        }, 'someSuperSecret', { expiresIn: '1h' })
        
         return { token: token, userId: user._id.toString() };
     },
 
     createPost: async function({ postInput }, req){
+        if(!req.isAuth){
+            const error = new Error('Not authenticated!');
+            error.code = 401;
+            throw error;
+        }
         let errors = [];
         if(validator.isEmpty(postInput.title) || !validator.isLength(postInput.title, {min: 5})){
             errors.push({message: 'Title is invalid.'})
@@ -77,12 +82,21 @@ module.exports = {
             throw error;
         }
 
+        let user = await User.findById(req.userId);
+        if(!user){
+            let error = new Error('Invalid user');
+            error.code = 401;
+            throw error;
+        }
         let post = new Post({
             title: postInput.title,
             content: postInput.content,
-            imageUrl: postInput.imageUrl
+            imageUrl: postInput.imageUrl,
+            creator: user
         });
         let createdPost = await post.save();
+        user.posts.push(createdPost);
+        await user.save();
         return{
             ...createdPost._doc,
             _id: createdPost._id.toString(),
