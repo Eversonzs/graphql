@@ -6,8 +6,8 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const graphqlHttp = require('express-graphql');
 
-const postAppSchema = require('./postApp/schema');
-const postAppResolver = require('./postApp/resolvers');
+const graphqlSchema = require('./graphql/schema');
+const graphqlResolver = require('./graphql/resolvers');
 const auth = require('./middleware/auth');
 
 const app = express();
@@ -55,32 +55,9 @@ app.use((req, res, next) => {
 
 app.use(auth);
 
-app.use('/users',/*  (req, res) => { */
-  graphqlHttp({
-    schema: postAppSchema,
-    rootValue: postAppResolver,
-    graphiql: true,
-    formatError(err){
-      if(!err.originalError){
-        return err;
-      }
-      console.log("this err----", err.originalError.data);
-      let data = err.originalError.data;
-      let message = err.message || 'An error ocurred.';;
-      let code = err.originalError.code || 500;
-      /* data.forEach(error => {
-        message = error.message || 'An error ocurred.';
-        code = error.code || 500;
-      }); */
-      /* res.status(code).json({ message: message, data: data }); */
-      return { message: message, status: code, data: data};
-    }
-  }) /* (req, res)
-} */);
-
-app.use('/postApp', graphqlHttp({
-  schema: postAppSchema,
-  rootValue: postAppResolver,
+app.use('/graphql', graphqlHttp({
+  schema: graphqlSchema,
+  rootValue: graphqlResolver,
   graphiql: true,
   formatError(err){
     if(!err.originalError){

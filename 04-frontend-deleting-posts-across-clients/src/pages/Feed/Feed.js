@@ -22,7 +22,7 @@ class Feed extends Component {
   };
 
   componentDidMount() {
-    fetch('http://localhost:8080/auth/status', {
+    /* fetch('http://localhost:8080/auth/status', {
       headers: {
         Authorization: 'Bearer ' + this.props.token
       }
@@ -36,7 +36,7 @@ class Feed extends Component {
       .then(resData => {
         this.setState({ status: resData.status });
       })
-      .catch(this.catchError);
+      .catch(this.catchError); */
 
     this.loadPosts();
   }
@@ -54,31 +54,57 @@ class Feed extends Component {
       page--;
       this.setState({ postPage: page });
     }
-    fetch('http://localhost:8080/feed/posts?page=' + page, {
-      headers: {
-        Authorization: 'Bearer ' + this.props.token
-      }
-    })
-      .then(res => {
-        if (res.status !== 200) {
-          throw new Error('Failed to fetch posts.');
+
+    const graphqlQuery = {
+      query: `
+        {
+          posts{
+            posts{
+                _id
+                title
+                content
+                creator{
+                  name
+                  email
+                  _id
+                }
+                createdAt
+            }
+            totalPosts
+          }
         }
-        return res.json();
-      })
-      .then(resData => {
-        this.setState({
-          posts: resData.posts.map(post => {
+      `
+    };
+    fetch('http://localhost:8080/graphql', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + this.props.token,
+        'content-Type': 'application/json'
+      },
+      body: JSON.stringify(graphqlQuery)
+    })
+    .then(res =>{
+      return res.json();
+    })
+    .then(resData =>{
+      console.log("resData---Zzzzzz>", resData);
+      if(resData.errors){
+        throw new Error('Fetching posts failed!')
+      }
+      
+      this.setState({
+          posts: resData.data.posts.posts.map(post => {
             return {
               ...post,
               imagePath: post.imageUrl
             };
           }),
-          totalPosts: resData.totalItems,
+          totalPosts: resData.data.posts.totalPosts,
           postsLoading: false
         });
       })
       .catch(this.catchError);
-  };
+    }
 
   statusUpdateHandler = event => {
     event.preventDefault();
@@ -154,7 +180,7 @@ class Feed extends Component {
       `
     }
 
-    fetch('http://localhost:8080/postApp', {
+    fetch('http://localhost:8080/graphql', {
       method: 'POST',
       body: JSON.stringify(graphqlQuery),
       headers: {

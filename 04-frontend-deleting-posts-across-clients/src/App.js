@@ -60,14 +60,17 @@ class App extends Component {
     event.preventDefault();
     let graphqlUserLoginQuery = {
       query: `
-      {  
+      {
         login(email: "${authData.email}", password: "${authData.password}")
-        { token userId }
+        {
+          token
+          userId
+        }
       }
       `
     }
     this.setState({ authLoading: true });
-    fetch('http://localhost:8080/postApp', {
+    fetch('http://localhost:8080/graphql', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -137,7 +140,7 @@ class App extends Component {
       `
     }
 
-    fetch('http://localhost:8080/postApp', {
+    fetch('http://localhost:8080/graphql', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
