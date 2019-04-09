@@ -154,7 +154,7 @@ class Feed extends Component {
       `
     }
 
-    fetch('http://localhost:8080/graphql', {
+    fetch('http://localhost:8080/postApp', {
       method: 'POST',
       body: JSON.stringify(graphqlQuery),
       headers: {

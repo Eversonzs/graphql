@@ -6,8 +6,8 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const graphqlHttp = require('express-graphql');
 
-const graphqlSchema = require('./graphql/schema');
-const graphqlResolver = require('./graphql/resolvers');
+const postAppSchema = require('./postApp/schema');
+const postAppResolver = require('./postApp/resolvers');
 const auth = require('./middleware/auth');
 
 const app = express();
@@ -57,8 +57,8 @@ app.use(auth);
 
 app.use('/users',/*  (req, res) => { */
   graphqlHttp({
-    schema: graphqlSchema,
-    rootValue: graphqlResolver,
+    schema: postAppSchema,
+    rootValue: postAppResolver,
     graphiql: true,
     formatError(err){
       if(!err.originalError){
@@ -78,9 +78,9 @@ app.use('/users',/*  (req, res) => { */
   }) /* (req, res)
 } */);
 
-app.use('/graphql', graphqlHttp({
-  schema: graphqlSchema,
-  rootValue: graphqlResolver,
+app.use('/postApp', graphqlHttp({
+  schema: postAppSchema,
+  rootValue: postAppResolver,
   graphiql: true,
   formatError(err){
     if(!err.originalError){

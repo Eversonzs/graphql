@@ -67,7 +67,7 @@ class App extends Component {
       `
     }
     this.setState({ authLoading: true });
-    fetch('http://localhost:8080/users', {
+    fetch('http://localhost:8080/postApp', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -137,7 +137,7 @@ class App extends Component {
       `
     }
 
-    fetch('http://localhost:8080/users', {
+    fetch('http://localhost:8080/postApp', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
